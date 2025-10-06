@@ -209,44 +209,39 @@ public class MainActivity extends AppCompatActivity {
         return "<!DOCTYPE html>" +
                 "<html lang='en'>" +
                 "<head>" +
-                "    <meta charset='UTF-8'>" +
-                "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-                "    <title>Pyzit - Offline</title>" +
-                "    <style>" +
-                "        * { margin: 0; padding: 0; box-sizing: border-box; }" +
-                "        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }" +
-                "        .offline-container { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 40px 30px; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); max-width: 400px; width: 100%; }" +
-                "        .icon { font-size: 80px; margin-bottom: 20px; color: #667eea; }" +
-                "        h1 { color: #333; margin-bottom: 15px; font-size: 24px; font-weight: 600; }" +
-                "        p { color: #666; margin-bottom: 30px; line-height: 1.6; font-size: 16px; }" +
-                "        .retry-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); width: 100%; }" +
-                "        .loading { display: none; margin-top: 20px; color: #666; }" +
-                "        .tips { margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 10px; text-align: left; }" +
-                "        .tips h3 { color: #333; margin-bottom: 10px; font-size: 14px; }" +
-                "        .tips ul { color: #666; font-size: 12px; padding-left: 20px; }" +
-                "        .tips li { margin-bottom: 5px; }" +
-                "    </style>" +
+                "  <meta charset='UTF-8'>" +
+                "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+                "  <title>Pyzit • Offline</title>" +
+                "  <style>" +
+                "    *{margin:0;padding:0;box-sizing:border-box}" +
+                "    body{font-family:'Segoe UI',Roboto,sans-serif;background:#F4F6FA;height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:#2E3A59}" +
+                "    .card{background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.08);padding:36px 32px;text-align:center;max-width:400px;width:100%;animation:fadeIn .6s ease}" +
+                "    img.logo{width:120px;height:auto;margin-bottom:20px;}" +
+                "    h1{font-size:22px;font-weight:600;margin-bottom:12px;color:#2E3A59}" +
+                "    p{font-size:15px;color:#4D5C7D;margin-bottom:25px;line-height:1.6}" +
+                "    button{background:#5A67D8;border:none;color:#fff;padding:14px 28px;border-radius:30px;font-size:15px;font-weight:600;cursor:pointer;transition:all .25s ease;width:100%;box-shadow:0 6px 18px rgba(90,103,216,0.3)}" +
+                "    button:hover{background:#4F57C4;transform:translateY(-2px);box-shadow:0 8px 22px rgba(90,103,216,0.35)}" +
+                "    .loading{display:none;margin-top:16px;color:#6D748C;font-size:13px}" +
+                "    @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}" +
+                "  </style>" +
                 "</head>" +
                 "<body>" +
-                "    <div class='offline-container'>" +
-                "        <div class='icon'>📶</div>" +
-                "        <h1>No Internet Connection</h1>" +
-                "        <p>It seems you're offline. Please check your connection and try again.</p>" +
-                "        <button class='retry-btn' onclick='retryConnection()'>Try Again</button>" +
-                "        <div class='loading' id='loading'>Checking connection...</div>" +
-                "        <div class='tips'>" +
-                "            <h3>Quick Tips:</h3>" +
-                "            <ul>" +
-                "                <li>Check your Wi-Fi or mobile data</li>" +
-                "                <li>Turn on Airplane mode and turn it off</li>" +
-                "                <li>Restart your router</li>" +
-                "                <li>Move to a better signal area</li>" +
-                "            </ul>" +
-                "        </div>" +
-                "    </div>" +
-                "    <script>function retryConnection() { var btn = document.querySelector('.retry-btn'); var loading = document.getElementById('loading'); btn.style.display = 'none'; loading.style.display = 'block'; Android.retryConnection(); }</script>" +
+                "  <div class='card'>" +
+                "    <img src='file:///android_asset/pyzit_logo.png' alt='Pyzit Logo' class='logo'>" +
+                "    <h1>You're Offline</h1>" +
+                "    <p>We couldn’t reach Pyzit. Please check your network and try again.</p>" +
+                "    <button onclick='retryConnection()'>Reconnect</button>" +
+                "    <div class='loading' id='loading'>🔄 Checking connection...</div>" +
+                "  </div>" +
+                "  <script>" +
+                "    function retryConnection(){var btn=document.querySelector('button');var load=document.getElementById('loading');btn.style.display='none';load.style.display='block';if(window.Android){Android.retryConnection();}}" +
+                "  </script>" +
                 "</body>" +
                 "</html>";
+
+
+
+
     }
 
     private boolean isNetworkAvailable() {
