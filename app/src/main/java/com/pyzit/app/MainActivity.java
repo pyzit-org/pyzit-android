@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         isOffline = false;
         mywebView.setVisibility(View.VISIBLE);
         showLoadingScreen();
-        mywebView.loadUrl("https://qwerty.pyzit.com");
+        mywebView.loadUrl("https://pyzit.com");
     }
 
     private void showLoadingScreen() {
