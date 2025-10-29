@@ -1,4 +1,4 @@
-package com.pyzit.app;
+package com.pyzit.android;
 
 import android.graphics.Bitmap;
 import android.content.Intent;

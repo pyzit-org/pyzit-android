@@ -1,4 +1,4 @@
-package com.pyzit.app;
+package com.pyzit.android;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.pyzit.app", appContext.getPackageName());
+        assertEquals("com.pyzit.android", appContext.getPackageName());
     }
 }

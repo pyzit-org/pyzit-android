@@ -1,4 +1,4 @@
-package com.pyzit.app;
+package com.pyzit.android;
 
 import org.junit.Test;
 

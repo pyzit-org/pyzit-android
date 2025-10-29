@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.pyzit.app"
+    namespace = "com.pyzit.android"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.pyzit.app"
+        applicationId = "com.pyzit.android"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

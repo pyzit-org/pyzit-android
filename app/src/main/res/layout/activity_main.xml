@@ -30,7 +30,7 @@
             android:padding="40dp">
 
             <!-- Animated Logo -->
-            <com.pyzit.app.LogoLoadingView
+            <com.pyzit.android.LogoLoadingView
                 android:id="@+id/logoLoadingView"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
