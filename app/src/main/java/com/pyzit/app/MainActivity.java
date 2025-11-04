@@ -97,7 +97,37 @@ public class MainActivity extends AppCompatActivity {
 
         setupWebView();
         startDotAnimation();
-        checkInternetAndLoad();
+
+        // Handle deep links - call this instead of checkInternetAndLoad()
+        handleDeepLink();
+    }
+
+    private void handleDeepLink() {
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        Uri data = intent.getData();
+
+        // Check if this is a deep link
+        if (Intent.ACTION_VIEW.equals(action) && data != null) {
+            // This is a deep link - load the specific URL
+            String deepLinkUrl = data.toString();
+            loadDeepLinkUrl(deepLinkUrl);
+        } else {
+            // Normal app launch - load homepage
+            checkInternetAndLoad();
+        }
+    }
+
+    private void loadDeepLinkUrl(String url) {
+        if (isNetworkAvailable()) {
+            isOffline = false;
+            mywebView.setVisibility(View.VISIBLE);
+            showLoadingScreen();
+            // Load the actual deep link URL instead of homepage
+            mywebView.loadUrl(url);
+        } else {
+            showOfflinePage();
+        }
     }
 
     private void setupWebView() {
@@ -229,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
                 "  <div class='card'>" +
                 "    <img src='file:///android_asset/pyzit_logo.png' alt='Pyzit Logo' class='logo'>" +
                 "    <h1>You're Offline</h1>" +
-                "    <p>We couldn’t reach Pyzit. Please check your network and try again.</p>" +
+                "    <p>We couldn't reach Pyzit. Please check your network and try again.</p>" +
                 "    <button onclick='retryConnection()'>Reconnect</button>" +
                 "    <div class='loading' id='loading'>🔄 Checking connection...</div>" +
                 "  </div>" +
@@ -238,10 +268,6 @@ public class MainActivity extends AppCompatActivity {
                 "  </script>" +
                 "</body>" +
                 "</html>";
-
-
-
-
     }
 
     private boolean isNetworkAvailable() {
@@ -252,6 +278,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class MyWebViewClient extends WebViewClient {
+
+
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
@@ -283,18 +311,39 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (url.contains("pyzit.com")) {
-                return false;
+            try {
+                Uri uri = Uri.parse(url);
+                String host = uri.getHost();
+
+                // Handle pyzit.com and ALL subdomains internally
+                if (host != null && host.endsWith(".pyzit.com")) {
+                    return false; // Let WebView handle it internally
+                }
+
+                // Handle OAuth and authentication URLs internally
+                if (url.contains("accounts.google.com") ||
+                        url.contains("github.com") ||
+                        url.contains("oauth") ||
+                        url.contains("auth")) {
+                    return false;
+                }
+
+                // External URLs - open in browser
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+                return true;
+
+            } catch (Exception e) {
+                // If there's any error parsing URL, open in browser
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+                return true;
             }
-            if (url.contains("accounts.google.com") || url.contains("github.com") || url.contains("oauth") || url.contains("auth")) {
-                return false;
-            }
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
-            return true;
         }
+
     }
 
     // JavaScript interface for communication
@@ -353,6 +402,13 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleDeepLink();
     }
 
     @Override
