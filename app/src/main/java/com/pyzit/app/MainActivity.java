@@ -17,7 +17,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,11 +28,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -85,21 +79,26 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        mywebView = (WebView) findViewById(R.id.webview);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        loadingLayout = findViewById(R.id.loadingLayout);
-        logoLoadingView = (LogoLoadingView) findViewById(R.id.logoLoadingView);
-        loadingText = (TextView) findViewById(R.id.loadingText);
-        progressText = (TextView) findViewById(R.id.progressText);
-        dot1 = findViewById(R.id.dot1);
-        dot2 = findViewById(R.id.dot2);
-        dot3 = findViewById(R.id.dot3);
+        // Initialize views safely
+        initializeViews();
 
         setupWebView();
         startDotAnimation();
 
-        // Handle deep links - call this instead of checkInternetAndLoad()
+        // Handle deep links
         handleDeepLink();
+    }
+
+    private void initializeViews() {
+        mywebView = findViewById(R.id.webview);
+        progressBar = findViewById(R.id.progressBar);
+        loadingLayout = findViewById(R.id.loadingLayout);
+        logoLoadingView = findViewById(R.id.logoLoadingView);
+        loadingText = findViewById(R.id.loadingText);
+        progressText = findViewById(R.id.progressText);
+        dot1 = findViewById(R.id.dot1);
+        dot2 = findViewById(R.id.dot2);
+        dot3 = findViewById(R.id.dot3);
     }
 
     private void handleDeepLink() {
@@ -107,13 +106,10 @@ public class MainActivity extends AppCompatActivity {
         String action = intent.getAction();
         Uri data = intent.getData();
 
-        // Check if this is a deep link
         if (Intent.ACTION_VIEW.equals(action) && data != null) {
-            // This is a deep link - load the specific URL
             String deepLinkUrl = data.toString();
             loadDeepLinkUrl(deepLinkUrl);
         } else {
-            // Normal app launch - load homepage
             checkInternetAndLoad();
         }
     }
@@ -123,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
             isOffline = false;
             mywebView.setVisibility(View.VISIBLE);
             showLoadingScreen();
-            // Load the actual deep link URL instead of homepage
             mywebView.loadUrl(url);
         } else {
             showOfflinePage();
@@ -131,47 +126,68 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupWebView() {
+        // Set up WebViewClient first
         mywebView.setWebViewClient(new MyWebViewClient());
         mywebView.setWebChromeClient(new MyWebChromeClient());
 
         WebSettings webSettings = mywebView.getSettings();
+
+        // Basic settings
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setSupportMultipleWindows(true);
 
-        // Enable file access and upload
+        // File access
         webSettings.setAllowFileAccess(true);
         webSettings.setAllowContentAccess(true);
         webSettings.setAllowFileAccessFromFileURLs(true);
         webSettings.setAllowUniversalAccessFromFileURLs(true);
 
-        // Enable caching (Modern approach)
+        // Performance optimizations
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
 
-        // Enable DOM storage and database for better caching
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setDatabaseEnabled(true);
+        // Remove problematic settings that might cause crashes
+        // webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH); // Can cause issues
 
-        // Set a custom user agent
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        webSettings.setBuiltInZoomControls(false);
+        webSettings.setDisplayZoomControls(false);
+
+        // User agent
         webSettings.setUserAgentString("Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 PyzitApp/1.0");
+
+        // Safe WebView initialization for newer Android versions
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                WebView.setDataDirectorySuffix("pyzit");
+            }
+        } catch (Exception e) {
+            // Ignore errors in WebView initialization
+        }
     }
 
     private void startDotAnimation() {
         final Runnable dotRunnable = new Runnable() {
             @Override
             public void run() {
-                // Rotate alpha values for dots
-                float alpha1 = dot1.getAlpha();
-                float alpha2 = dot2.getAlpha();
-                float alpha3 = dot3.getAlpha();
+                try {
+                    float alpha1 = dot1.getAlpha();
+                    float alpha2 = dot2.getAlpha();
+                    float alpha3 = dot3.getAlpha();
 
-                dot1.setAlpha(alpha3);
-                dot2.setAlpha(alpha1);
-                dot3.setAlpha(alpha2);
+                    dot1.setAlpha(alpha3);
+                    dot2.setAlpha(alpha1);
+                    dot3.setAlpha(alpha2);
 
-                dotAnimationHandler.postDelayed(this, 300);
+                    dotAnimationHandler.postDelayed(this, 300);
+                } catch (Exception e) {
+                    // Ignore animation errors
+                }
             }
         };
         dotAnimationHandler.postDelayed(dotRunnable, 300);
@@ -193,13 +209,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showLoadingScreen() {
-        loadingLayout.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-        loadingText.setText("Loading...");
-        progressText.setText("0%");
+        if (loadingLayout != null) {
+            loadingLayout.setVisibility(View.VISIBLE);
+        }
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+        if (loadingText != null) {
+            loadingText.setText("Loading...");
+        }
+        if (progressText != null) {
+            progressText.setText("0%");
+        }
     }
 
     private void hideLoadingScreen() {
+        if (loadingLayout == null) return;
+
         AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
         fadeOut.setDuration(500);
         fadeOut.setFillAfter(true);
@@ -209,33 +235,38 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                loadingLayout.setVisibility(View.GONE);
+                if (loadingLayout != null) {
+                    loadingLayout.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {}
         });
         loadingLayout.startAnimation(fadeOut);
-        progressBar.setVisibility(View.GONE);
+
+        if (progressBar != null) {
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     private void showOfflinePage() {
         isOffline = true;
-        mywebView.setVisibility(View.VISIBLE);
-
-        String offlineHtml = createOfflinePage();
-        mywebView.loadDataWithBaseURL(
-                "file:///android_asset/",
-                offlineHtml,
-                "text/html",
-                "UTF-8",
-                null
-        );
+        if (mywebView != null) {
+            mywebView.setVisibility(View.VISIBLE);
+            String offlineHtml = createOfflinePage();
+            mywebView.loadDataWithBaseURL(
+                    "file:///android_asset/",
+                    offlineHtml,
+                    "text/html",
+                    "UTF-8",
+                    null
+            );
+        }
         hideLoadingScreen();
     }
 
     private String createOfflinePage() {
-        // Your existing offline page HTML
         return "<!DOCTYPE html>" +
                 "<html lang='en'>" +
                 "<head>" +
@@ -271,14 +302,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        try {
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private class MyWebViewClient extends WebViewClient {
-
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -311,15 +345,26 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            return handleUrlLoading(url);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                return handleUrlLoading(request.getUrl().toString());
+            }
+            return false;
+        }
+
+        private boolean handleUrlLoading(String url) {
             try {
                 Uri uri = Uri.parse(url);
                 String host = uri.getHost();
 
                 // Handle pyzit.com and ALL subdomains internally
-                if (host != null && host.endsWith(".pyzit.com")) {
+                if (host != null && (host.equals("pyzit.com") || host.endsWith(".pyzit.com"))) {
                     return false; // Let WebView handle it internally
                 }
 
@@ -337,16 +382,11 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             } catch (Exception e) {
-                // If there's any error parsing URL, open in browser
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(intent);
-                return true;
+                return false;
             }
         }
-
     }
 
-    // JavaScript interface for communication
     public class WebAppInterface {
         @android.webkit.JavascriptInterface
         public void retryConnection() {
@@ -359,8 +399,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // WebChromeClient to handle file uploads and progress
     private class MyWebChromeClient extends WebChromeClient {
+
+        @Override
+        public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+            // For target="_blank" links - load in main WebView
+            WebView.HitTestResult result = view.getHitTestResult();
+            if (result != null) {
+                String url = result.getExtra();
+                if (url != null) {
+                    view.loadUrl(url);
+                }
+            }
+            return false; // Don't create new window
+        }
+
         @Override
         public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
             if (uploadMessage != null) {
@@ -383,22 +436,25 @@ public class MainActivity extends AppCompatActivity {
         public void onProgressChanged(WebView view, int newProgress) {
             super.onProgressChanged(view, newProgress);
 
-            // Update progress bar and text
-            progressBar.setProgress(newProgress);
-            progressText.setText(newProgress + "%");
-
-            // Update loading text based on progress
-            if (newProgress < 30) {
-                loadingText.setText("Connecting...");
-            } else if (newProgress < 70) {
-                loadingText.setText("Loading content...");
-            } else {
-                loadingText.setText("Almost ready...");
+            if (progressBar != null) {
+                progressBar.setProgress(newProgress);
+            }
+            if (progressText != null) {
+                progressText.setText(newProgress + "%");
+            }
+            if (loadingText != null) {
+                if (newProgress < 30) {
+                    loadingText.setText("Connecting...");
+                } else if (newProgress < 70) {
+                    loadingText.setText("Loading content...");
+                } else {
+                    loadingText.setText("Almost ready...");
+                }
             }
 
-            if (newProgress == 100) {
+            if (newProgress == 100 && progressBar != null) {
                 progressBar.setVisibility(View.GONE);
-            } else if (progressBar.getVisibility() == View.GONE) {
+            } else if (progressBar != null && progressBar.getVisibility() == View.GONE) {
                 progressBar.setVisibility(View.VISIBLE);
             }
         }
@@ -417,6 +473,17 @@ public class MainActivity extends AppCompatActivity {
         if (isOffline) {
             checkInternetAndLoad();
         }
+        if (mywebView != null) {
+            mywebView.onResume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mywebView != null) {
+            mywebView.onPause();
+        }
     }
 
     @Override
@@ -428,11 +495,14 @@ public class MainActivity extends AppCompatActivity {
         if (dotAnimationHandler != null) {
             dotAnimationHandler.removeCallbacksAndMessages(null);
         }
+        if (mywebView != null) {
+            mywebView.destroy();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if (mywebView.canGoBack() && !isOffline) {
+        if (mywebView != null && mywebView.canGoBack() && !isOffline) {
             mywebView.goBack();
         } else {
             super.onBackPressed();
